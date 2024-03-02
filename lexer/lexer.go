@@ -17,10 +17,7 @@ func (l *Lexer) NextToken() token.Token {
 	switch l.ch {
 	case '=':
 		if l.PeekChar() == '=' {
-			ch := l.ch
-			l.ReadChar()
-			literal := string(ch) + string(l.ch)
-			tok = token.Token{Type: token.EQ, Literal: literal}
+			tok = l.MakeTwoCharToken()
 		} else {
 			tok = newToken(token.ASSIGN, l.ch)
 		}
@@ -50,10 +47,7 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.SEMICOLON, l.ch)
 	case '!':
 		if l.PeekChar() == '=' {
-			ch := l.ch
-			l.ReadChar()
-			literal := string(ch) + string(l.ch)
-			tok = token.Token{Type: token.NEQ, Literal: literal}
+			tok = l.MakeTwoCharToken()
 		} else {
 			tok = newToken(token.BANG, l.ch)
 		}
@@ -115,6 +109,22 @@ func New(input string) *Lexer {
 	l := &Lexer{input: input}
 	l.ReadChar()
 	return l
+}
+
+func (l *Lexer) MakeTwoCharToken() token.Token {
+	var tokenType token.Type
+	ch := l.ch
+	l.ReadChar()
+	literal := string(ch) + string(l.ch)
+	switch literal {
+	case "==":
+		tokenType = token.EQ
+	case "!=":
+		tokenType = token.NEQ
+	default:
+		tokenType = token.ILLEGAL
+	}
+	return token.Token{Type: tokenType, Literal: literal}
 }
 
 func (l *Lexer) ReadChar() {
